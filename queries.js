@@ -4,24 +4,29 @@
  * permissions that is not accessible from version control.
  */
 
-const Pool = require('pg').Pool
+
+// Creates a pool of connections to avoid opening a new client for each query
+const Pool = require('pg').Pool;
 const pool = new Pool({
-  user: 'admin',
+  user: 'user_admin',
   host: 'localhost',
   database: 'users_api',
   password: 'password',
-  port: 5432,
+  port: 5433,
 });
 
+// gets all users
 const getUsers = (request, response) => {
     pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
       if (error) {
+          console.log('ERROR message ' + error)
         throw error;
       }
       response.status(200).json(results.rows);
     })
-  }
+  };
 
+  // gets single user by id
   const getUserById = (request, response) => {
     const id = parseInt(request.params.id);
   
@@ -31,8 +36,21 @@ const getUsers = (request, response) => {
       }
       response.status(200).json(results.rows);
     })
-}
+};
 
+// creates a new user
+const createUser = (request, response) => {
+    const { name, email } = request.body;
+  
+    pool.query('INSERT INTO users (name, email) VALUES ($1, $2)', [name, email], (error, results) => {
+      if (error) {
+        throw error;
+      }
+      response.status(201).send(`User added with ID: ${result.insertId}`);
+    })
+  };
+
+// updates a user by id
 const updateUser = (request, response) => {
     const id = parseInt(request.params.id)
     const { name, email } = request.body
@@ -42,22 +60,23 @@ const updateUser = (request, response) => {
       [name, email, id],
       (error, results) => {
         if (error) {
-          throw error
+          throw error;
         }
-        response.status(200).send(`User modified with ID: ${id}`)
+        response.status(200).send(`User modified with ID: ${id}`);
       }
     )
-  }
+  };
 
+  // deletes user by id
   const deleteUser = (request, response) => {
-    const id = parseInt(request.params.id)
+    const id = parseInt(request.params.id);
   
     pool.query('DELETE FROM users WHERE id = $1', [id], (error, results) => {
       if (error) {
-        throw error
+        throw error;
       }
       response.status(200).send(`User deleted with ID: ${id}`)
-    })
+    });
   }
 
   module.exports = {

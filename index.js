@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const port = 3000; // here for demo purposes but won't be hardcoded when set up in qa and production env
+const port = 3000; // here for demo purposes but won't be hardcoded when set up in qa and production
 
 const db = require('./queries');
 
